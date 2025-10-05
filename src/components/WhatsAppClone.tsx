@@ -752,18 +752,20 @@ const WhatsAppClone: React.FC = () => {
 
       // Clear any input text for clean screenshot
       setMessageText('');
-      
+
       // Wait for state update to clear input field
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // Clone the chat element to avoid layout shifts from overlays/active modals
       const clone = element.cloneNode(true) as HTMLElement;
-      
+
       // Preserve original styling and layout
-      clone.style.width = `${element.scrollWidth}px`;
+      clone.style.width = `${element.offsetWidth}px`;
       clone.style.height = `${element.scrollHeight}px`;
       clone.style.overflow = 'visible';
       clone.style.boxSizing = 'border-box';
+      clone.style.display = 'flex';
+      clone.style.flexDirection = 'column';
 
       // Ensure images in clone are CORS-friendly
       const imgs = clone.querySelectorAll('img');
@@ -775,35 +777,79 @@ const WhatsAppClone: React.FC = () => {
         }
       });
 
-      // Preserve exact text styling in chat bubbles
+      // Remove menus, overlays, and interactive elements that shouldn't be in screenshot
+      const menusToRemove = clone.querySelectorAll('[class*="absolute"][class*="shadow"]');
+      menusToRemove.forEach(menu => {
+        const menuElement = menu as HTMLElement;
+        if (menuElement.textContent?.includes('Reply') ||
+            menuElement.textContent?.includes('Delete') ||
+            menuElement.textContent?.includes('Forward')) {
+          menuElement.remove();
+        }
+      });
+
+      // Preserve message container flex alignment
+      const messageContainers = clone.querySelectorAll('.flex.mb-1');
+      messageContainers.forEach((container) => {
+        const containerElement = container as HTMLElement;
+        const computedStyle = window.getComputedStyle(container);
+        containerElement.style.display = 'flex';
+        containerElement.style.justifyContent = computedStyle.justifyContent;
+        containerElement.style.marginBottom = computedStyle.marginBottom;
+        containerElement.style.width = '100%';
+      });
+
+      // Preserve exact styling in chat bubbles
       const bubbles = clone.querySelectorAll('.wa-bubble');
       bubbles.forEach((bubble) => {
         const bubbleElement = bubble as HTMLElement;
-        bubbleElement.style.cssText = `
-          position: relative;
-          display: inline-block;
-          max-width: 72%;
-          padding: 8px 12px;
-          border-radius: 18px;
-          word-wrap: break-word;
-          white-space: pre-wrap;
-          box-shadow: 0 1px 0 rgba(0,0,0,0.03);
-          -webkit-font-smoothing: antialiased;
-          text-align: left;
-        `;
+        const originalBubble = element.querySelector(`[class*="wa-bubble"]`) as HTMLElement;
+        const computedStyle = window.getComputedStyle(bubble);
+
+        // Preserve all computed styles that affect layout
+        bubbleElement.style.position = 'relative';
+        bubbleElement.style.display = 'inline-block';
+        bubbleElement.style.maxWidth = '65%';
+        bubbleElement.style.padding = computedStyle.padding;
+        bubbleElement.style.borderRadius = computedStyle.borderRadius;
+        bubbleElement.style.backgroundColor = computedStyle.backgroundColor;
+        bubbleElement.style.boxShadow = computedStyle.boxShadow;
+        bubbleElement.style.wordWrap = 'break-word';
+        bubbleElement.style.whiteSpace = 'pre-wrap';
+        bubbleElement.style.textAlign = 'left';
+
+        // Preserve text and timestamp container flex layout
+        const flexContainers = bubbleElement.querySelectorAll('.flex.items-end');
+        flexContainers.forEach(flexContainer => {
+          const flexElement = flexContainer as HTMLElement;
+          flexElement.style.display = 'flex';
+          flexElement.style.alignItems = 'flex-end';
+          flexElement.style.gap = '0.25rem';
+        });
 
         // Preserve text element styling
-        const textElement = bubbleElement.querySelector('p');
-        if (textElement) {
-          (textElement as HTMLElement).style.cssText = `
-            margin: 0;
-            font-size: 14.2px;
-            color: #111827;
-            line-height: 19px;
-            word-break: break-word;
-            text-align: left;
-          `;
-        }
+        const textElements = bubbleElement.querySelectorAll('p');
+        textElements.forEach(textElement => {
+          const textEl = textElement as HTMLElement;
+          const textComputed = window.getComputedStyle(textElement);
+          textEl.style.margin = '0';
+          textEl.style.fontSize = textComputed.fontSize;
+          textEl.style.color = textComputed.color;
+          textEl.style.lineHeight = textComputed.lineHeight;
+          textEl.style.wordBreak = 'break-word';
+          textEl.style.whiteSpace = 'pre-wrap';
+          textEl.style.textAlign = 'left';
+          textEl.style.paddingBottom = textComputed.paddingBottom;
+        });
+
+        // Preserve timestamp and status styling
+        const timestamps = bubbleElement.querySelectorAll('.text-\\[11px\\]');
+        timestamps.forEach(timestamp => {
+          const tsElement = timestamp as HTMLElement;
+          tsElement.style.fontSize = '11px';
+          tsElement.style.whiteSpace = 'nowrap';
+          tsElement.style.flexShrink = '0';
+        });
       });
 
       // Place clone offscreen to allow accurate rendering without affecting layout
@@ -820,10 +866,11 @@ const WhatsAppClone: React.FC = () => {
 
       // Use html2canvas with reliable options for better screenshot quality
       const canvas = await html2canvas(clone, {
-        background: 'white',
+        backgroundColor: darkMode ? '#0B141A' : '#E5DDD5',
         useCORS: true,
         allowTaint: false,
-        logging: false
+        logging: false,
+        scale: 2
       });
 
       // Clean up cloned DOM
@@ -1914,7 +1961,7 @@ const WhatsAppClone: React.FC = () => {
                   >
                     <div
                       onClick={() => setShowMessageMenu(showMessageMenu === message.id ? null : message.id)}
-                      className={`relative rounded-lg px-2 py-1.5 shadow-sm max-w-[65%] cursor-pointer hover:shadow-md transition-shadow ${
+                      className={`wa-bubble relative rounded-lg px-2 py-1.5 shadow-sm max-w-[65%] cursor-pointer hover:shadow-md transition-shadow ${
                         message.sender === 'me'
                           ? 'bg-[#D9FDD3]'
                           : 'bg-white'
