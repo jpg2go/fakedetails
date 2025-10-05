@@ -789,22 +789,28 @@ const WhatsAppClone: React.FC = () => {
       });
 
       // Preserve message container flex alignment
-      const messageContainers = clone.querySelectorAll('.flex.mb-1');
-      messageContainers.forEach((container) => {
+      const originalMessageContainers = element.querySelectorAll('.flex.mb-1');
+      const clonedMessageContainers = clone.querySelectorAll('.flex.mb-1');
+      clonedMessageContainers.forEach((container, index) => {
         const containerElement = container as HTMLElement;
-        const computedStyle = window.getComputedStyle(container);
-        containerElement.style.display = 'flex';
-        containerElement.style.justifyContent = computedStyle.justifyContent;
-        containerElement.style.marginBottom = computedStyle.marginBottom;
-        containerElement.style.width = '100%';
+        const originalContainer = originalMessageContainers[index] as HTMLElement;
+        if (originalContainer) {
+          const computedStyle = window.getComputedStyle(originalContainer);
+          containerElement.style.display = 'flex';
+          containerElement.style.justifyContent = computedStyle.justifyContent;
+          containerElement.style.marginBottom = computedStyle.marginBottom;
+          containerElement.style.width = '100%';
+        }
       });
 
       // Preserve exact styling in chat bubbles
-      const bubbles = clone.querySelectorAll('.wa-bubble');
-      bubbles.forEach((bubble) => {
+      const originalBubbles = element.querySelectorAll('.wa-bubble');
+      const clonedBubbles = clone.querySelectorAll('.wa-bubble');
+      clonedBubbles.forEach((bubble, bubbleIndex) => {
         const bubbleElement = bubble as HTMLElement;
-        const originalBubble = element.querySelector(`[class*="wa-bubble"]`) as HTMLElement;
-        const computedStyle = window.getComputedStyle(bubble);
+        const originalBubble = originalBubbles[bubbleIndex] as HTMLElement;
+        if (!originalBubble) return;
+        const computedStyle = window.getComputedStyle(originalBubble);
 
         // Preserve all computed styles that affect layout
         bubbleElement.style.position = 'relative';
@@ -819,36 +825,50 @@ const WhatsAppClone: React.FC = () => {
         bubbleElement.style.textAlign = 'left';
 
         // Preserve text and timestamp container flex layout
-        const flexContainers = bubbleElement.querySelectorAll('.flex.items-end');
-        flexContainers.forEach(flexContainer => {
+        const originalFlexContainers = originalBubble.querySelectorAll('.flex.items-end');
+        const clonedFlexContainers = bubbleElement.querySelectorAll('.flex.items-end');
+        clonedFlexContainers.forEach((flexContainer, flexIndex) => {
           const flexElement = flexContainer as HTMLElement;
-          flexElement.style.display = 'flex';
-          flexElement.style.alignItems = 'flex-end';
-          flexElement.style.gap = '0.25rem';
+          const originalFlex = originalFlexContainers[flexIndex] as HTMLElement;
+          if (originalFlex) {
+            const flexComputed = window.getComputedStyle(originalFlex);
+            flexElement.style.display = 'flex';
+            flexElement.style.alignItems = 'flex-end';
+            flexElement.style.gap = flexComputed.gap || '0.25rem';
+          }
         });
 
         // Preserve text element styling
-        const textElements = bubbleElement.querySelectorAll('p');
-        textElements.forEach(textElement => {
+        const originalTextElements = originalBubble.querySelectorAll('p');
+        const clonedTextElements = bubbleElement.querySelectorAll('p');
+        clonedTextElements.forEach((textElement, textIndex) => {
           const textEl = textElement as HTMLElement;
-          const textComputed = window.getComputedStyle(textElement);
-          textEl.style.margin = '0';
-          textEl.style.fontSize = textComputed.fontSize;
-          textEl.style.color = textComputed.color;
-          textEl.style.lineHeight = textComputed.lineHeight;
-          textEl.style.wordBreak = 'break-word';
-          textEl.style.whiteSpace = 'pre-wrap';
-          textEl.style.textAlign = 'left';
-          textEl.style.paddingBottom = textComputed.paddingBottom;
+          const originalText = originalTextElements[textIndex] as HTMLElement;
+          if (originalText) {
+            const textComputed = window.getComputedStyle(originalText);
+            textEl.style.margin = '0';
+            textEl.style.fontSize = textComputed.fontSize;
+            textEl.style.color = textComputed.color;
+            textEl.style.lineHeight = textComputed.lineHeight;
+            textEl.style.wordBreak = 'break-word';
+            textEl.style.whiteSpace = 'pre-wrap';
+            textEl.style.textAlign = 'left';
+            textEl.style.paddingBottom = textComputed.paddingBottom;
+          }
         });
 
         // Preserve timestamp and status styling
-        const timestamps = bubbleElement.querySelectorAll('.text-\\[11px\\]');
-        timestamps.forEach(timestamp => {
+        const originalTimestamps = originalBubble.querySelectorAll('.text-\\[11px\\]');
+        const clonedTimestamps = bubbleElement.querySelectorAll('.text-\\[11px\\]');
+        clonedTimestamps.forEach((timestamp, tsIndex) => {
           const tsElement = timestamp as HTMLElement;
-          tsElement.style.fontSize = '11px';
-          tsElement.style.whiteSpace = 'nowrap';
-          tsElement.style.flexShrink = '0';
+          const originalTs = originalTimestamps[tsIndex] as HTMLElement;
+          if (originalTs) {
+            const tsComputed = window.getComputedStyle(originalTs);
+            tsElement.style.fontSize = '11px';
+            tsElement.style.whiteSpace = 'nowrap';
+            tsElement.style.flexShrink = '0';
+          }
         });
       });
 
