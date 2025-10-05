@@ -750,151 +750,28 @@ const WhatsAppClone: React.FC = () => {
     try {
       const element = chatWindowRef.current;
 
-      // Clear any input text for clean screenshot
+      // Hide interactive elements temporarily
+      setShowMessageMenu(null);
+      setShowEmojiPicker(false);
       setMessageText('');
 
-      // Wait for state update to clear input field
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for UI updates
+      await new Promise(resolve => setTimeout(resolve, 150));
 
-      // Clone the chat element to avoid layout shifts from overlays/active modals
-      const clone = element.cloneNode(true) as HTMLElement;
-
-      // Preserve original styling and layout
-      clone.style.width = `${element.offsetWidth}px`;
-      clone.style.height = `${element.scrollHeight}px`;
-      clone.style.overflow = 'visible';
-      clone.style.boxSizing = 'border-box';
-      clone.style.display = 'flex';
-      clone.style.flexDirection = 'column';
-
-      // Ensure images in clone are CORS-friendly
-      const imgs = clone.querySelectorAll('img');
-      imgs.forEach((img) => {
-        try {
-          (img as HTMLImageElement).crossOrigin = 'anonymous';
-        } catch (e) {
-          // ignore
-        }
-      });
-
-      // Remove menus, overlays, and interactive elements that shouldn't be in screenshot
-      const menusToRemove = clone.querySelectorAll('[class*="absolute"][class*="shadow"]');
-      menusToRemove.forEach(menu => {
-        const menuElement = menu as HTMLElement;
-        if (menuElement.textContent?.includes('Reply') ||
-            menuElement.textContent?.includes('Delete') ||
-            menuElement.textContent?.includes('Forward')) {
-          menuElement.remove();
-        }
-      });
-
-      // Preserve message container flex alignment
-      const originalMessageContainers = element.querySelectorAll('[data-sender]');
-      const clonedMessageContainers = clone.querySelectorAll('[data-sender]');
-      clonedMessageContainers.forEach((container, index) => {
-        const containerElement = container as HTMLElement;
-        const originalContainer = originalMessageContainers[index] as HTMLElement;
-        if (originalContainer) {
-          const sender = containerElement.getAttribute('data-sender');
-          containerElement.style.display = 'flex';
-          containerElement.style.justifyContent = sender === 'me' ? 'flex-end' : 'flex-start';
-          containerElement.style.marginBottom = '0.25rem';
-          containerElement.style.width = '100%';
-        }
-      });
-
-      // Preserve exact styling in chat bubbles
-      const originalBubbles = element.querySelectorAll('.wa-bubble');
-      const clonedBubbles = clone.querySelectorAll('.wa-bubble');
-      clonedBubbles.forEach((bubble, bubbleIndex) => {
-        const bubbleElement = bubble as HTMLElement;
-        const originalBubble = originalBubbles[bubbleIndex] as HTMLElement;
-        if (!originalBubble) return;
-        const computedStyle = window.getComputedStyle(originalBubble);
-
-        // Preserve all computed styles that affect layout
-        bubbleElement.style.position = 'relative';
-        bubbleElement.style.display = 'inline-block';
-        bubbleElement.style.maxWidth = '65%';
-        bubbleElement.style.padding = computedStyle.padding;
-        bubbleElement.style.borderRadius = computedStyle.borderRadius;
-        bubbleElement.style.backgroundColor = computedStyle.backgroundColor;
-        bubbleElement.style.boxShadow = computedStyle.boxShadow;
-        bubbleElement.style.wordWrap = 'break-word';
-        bubbleElement.style.whiteSpace = 'pre-wrap';
-        bubbleElement.style.textAlign = 'left';
-
-        // Preserve text and timestamp container flex layout
-        const originalFlexContainers = originalBubble.querySelectorAll('.flex.items-end');
-        const clonedFlexContainers = bubbleElement.querySelectorAll('.flex.items-end');
-        clonedFlexContainers.forEach((flexContainer, flexIndex) => {
-          const flexElement = flexContainer as HTMLElement;
-          const originalFlex = originalFlexContainers[flexIndex] as HTMLElement;
-          if (originalFlex) {
-            const flexComputed = window.getComputedStyle(originalFlex);
-            flexElement.style.display = 'flex';
-            flexElement.style.alignItems = 'flex-end';
-            flexElement.style.gap = flexComputed.gap || '0.25rem';
-          }
-        });
-
-        // Preserve text element styling
-        const originalTextElements = originalBubble.querySelectorAll('p');
-        const clonedTextElements = bubbleElement.querySelectorAll('p');
-        clonedTextElements.forEach((textElement, textIndex) => {
-          const textEl = textElement as HTMLElement;
-          const originalText = originalTextElements[textIndex] as HTMLElement;
-          if (originalText) {
-            const textComputed = window.getComputedStyle(originalText);
-            textEl.style.margin = '0';
-            textEl.style.fontSize = textComputed.fontSize;
-            textEl.style.color = textComputed.color;
-            textEl.style.lineHeight = textComputed.lineHeight;
-            textEl.style.wordBreak = 'break-word';
-            textEl.style.whiteSpace = 'pre-wrap';
-            textEl.style.textAlign = 'left';
-            textEl.style.paddingBottom = textComputed.paddingBottom;
-          }
-        });
-
-        // Preserve timestamp and status styling
-        const originalTimestamps = originalBubble.querySelectorAll('.text-\\[11px\\]');
-        const clonedTimestamps = bubbleElement.querySelectorAll('.text-\\[11px\\]');
-        clonedTimestamps.forEach((timestamp, tsIndex) => {
-          const tsElement = timestamp as HTMLElement;
-          const originalTs = originalTimestamps[tsIndex] as HTMLElement;
-          if (originalTs) {
-            const tsComputed = window.getComputedStyle(originalTs);
-            tsElement.style.fontSize = '11px';
-            tsElement.style.whiteSpace = 'nowrap';
-            tsElement.style.flexShrink = '0';
-          }
-        });
-      });
-
-      // Place clone offscreen to allow accurate rendering without affecting layout
-      const container = document.createElement('div');
-      container.style.position = 'fixed';
-      container.style.left = '-9999px';
-      container.style.top = '0';
-      container.style.pointerEvents = 'none';
-      container.appendChild(clone);
-      document.body.appendChild(container);
-
-      // Wait a tick for fonts/images to layout
-      await new Promise(resolve => setTimeout(resolve, 250));
-
-      // Use html2canvas with reliable options for better screenshot quality
-      const canvas = await html2canvas(clone, {
+      // Capture directly with html2canvas
+      const canvas = await html2canvas(element, {
         backgroundColor: darkMode ? '#0B141A' : '#E5DDD5',
         useCORS: true,
         allowTaint: false,
         logging: false,
-        scale: 2
+        scale: 2,
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+        x: 0,
+        y: 0
       });
-
-      // Clean up cloned DOM
-      document.body.removeChild(container);
 
       const link = document.createElement('a');
       link.download = `whatsapp-chat-${selectedChat?.name || 'export'}-${Date.now()}.png`;
