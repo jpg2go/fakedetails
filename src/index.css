@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom utilities for iPhone 16 Pro Max styling */
+@layer utilities {
+  .iphone-container {
+    /* Slightly smaller iPhone preview for better fit on page */
+    max-width: min(420px, 92vw);
+    max-height: min(calc(420px * 16 / 9), 92vh);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  
+  .iphone-aspect {
+    aspect-ratio: 9 / 16;
+  }
+
+  /* Samsung S20 Ultra basic container and aspect */
+  .android-container {
+    max-width: min(400px, 90vw);
+    max-height: min(calc(400px * 16 / 9), 85vh);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .android-aspect {
+    aspect-ratio: 9 / 16;
+  }
+
+  /* Simple punch-hole camera overlay for Android */
+  .android-camera-hole {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 18px;
+    background: #000;
+    border-radius: 9999px;
+    z-index: 20;
+  }
+
+  /* Thin scrollbar for desktop chat area */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 116, 139, 0.5); /* slate-500/50 */
+    border-radius: 9999px;
+  }
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
+  }
+  /* WhatsApp-like bubble styles (pixel-tuned) */
+  .wa-bubble {
+    position: relative;
+    display: inline-block;
+    max-width: 72%;
+    padding: 8px 12px;
+    border-radius: 18px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* incoming (left) */
+  .wa-bubble.them {
+    background: #ffffff;
+    color: #111827;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 18px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+  }
+
+  /* outgoing (right) */
+  .wa-bubble.me {
+    background: #dcf8c6;
+    color: #111827;
+    border-top-right-radius: 6px;
+    border-top-left-radius: 18px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+  }
+
+  /* Tail (soft shadow + colored square rotated) */
+  .wa-bubble.them::before,
+  .wa-bubble.me::before {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    transform: rotate(45deg);
+    z-index: 0;
+  }
+  .wa-bubble.them::before {
+    left: -6px;
+    top: 14px;
+    background: #ffffff;
+    box-shadow: -2px 2px 2px rgba(0,0,0,0.03);
+  }
+  .wa-bubble.me::before {
+    right: -6px;
+    top: 14px;
+    background: #dcf8c6;
+    box-shadow: 2px 2px 2px rgba(0,0,0,0.03);
+  }
+
+  /* small darker edge to mimic WhatsApp tail seam */
+  .wa-bubble.them::after,
+  .wa-bubble.me::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    transform: rotate(45deg);
+    z-index: 1;
+  }
+  .wa-bubble.them::after { left: -3px; top: 15px; background: rgba(0,0,0,0.02); }
+  .wa-bubble.me::after { right: -3px; top: 15px; background: rgba(0,0,0,0.02); }
+
+  /* meta (time + ticks) positioned inside bubble at bottom-right */
+  .wa-meta {
+    position: absolute;
+    right: 8px;
+    bottom: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    pointer-events: none;
+    z-index: 3;
+    white-space: nowrap;
+  }
+
+  .wa-time {
+    color: rgba(55,65,81,0.7); /* gray-600/70 */
+    font-size: 11px;
+    line-height: 1;
+    padding: 0 2px;
+  }
+
+  .wa-read { font-size: 12px; color: rgba(0,0,0,0.45); transform: translateY(1px); }
+  .wa-read.wa-read-yes { color: #34b7f1; /* blue ticks when read */ }
+  .wa-read.wa-read-no { color: rgba(0,0,0,0.35); }
+
+  /* ensure space for meta so text doesn't overlap */
+  .wa-bubble.them { padding-right: 76px; }
+  .wa-bubble.me { padding-right: 88px; }
+
+  /* Date pill style centered between messages */
+  .wa-date-pill {
+    display: inline-block;
+    background: rgba(255,255,255,0.92);
+    color: #4b5563;
+    padding: 6px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+  }
+
+  /* duplicate rules removed (final refined rules present earlier) */
+}
