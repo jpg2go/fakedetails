@@ -1856,6 +1856,11 @@ const WhatsAppClone: React.FC = () => {
                   <div
                     className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'} mb-1`}
                     data-sender={message.sender}
+                    style={{
+                      display: 'flex',
+                      justifyContent: message.sender === 'me' ? 'flex-end' : 'flex-start',
+                      width: '100%'
+                    }}
                   >
                     <div
                       onClick={() => setShowMessageMenu(showMessageMenu === message.id ? null : message.id)}
@@ -1865,7 +1870,10 @@ const WhatsAppClone: React.FC = () => {
                           : 'bg-white'
                       } ${message.deletedForEveryone ? 'opacity-60 italic' : ''}`}
                       style={{
-                        borderRadius: message.sender === 'me' ? '7.5px 7.5px 0px 7.5px' : '7.5px 7.5px 7.5px 0px'
+                        borderRadius: message.sender === 'me' ? '7.5px 7.5px 0px 7.5px' : '7.5px 7.5px 7.5px 0px',
+                        backgroundColor: message.sender === 'me' ? '#D9FDD3' : '#ffffff',
+                        maxWidth: '65%',
+                        display: 'inline-block'
                       }}
                     >
                         {message.isStarred && (
