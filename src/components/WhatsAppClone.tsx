@@ -789,16 +789,16 @@ const WhatsAppClone: React.FC = () => {
       });
 
       // Preserve message container flex alignment
-      const originalMessageContainers = element.querySelectorAll('.flex.mb-1');
-      const clonedMessageContainers = clone.querySelectorAll('.flex.mb-1');
+      const originalMessageContainers = element.querySelectorAll('[data-sender]');
+      const clonedMessageContainers = clone.querySelectorAll('[data-sender]');
       clonedMessageContainers.forEach((container, index) => {
         const containerElement = container as HTMLElement;
         const originalContainer = originalMessageContainers[index] as HTMLElement;
         if (originalContainer) {
-          const computedStyle = window.getComputedStyle(originalContainer);
+          const sender = containerElement.getAttribute('data-sender');
           containerElement.style.display = 'flex';
-          containerElement.style.justifyContent = computedStyle.justifyContent;
-          containerElement.style.marginBottom = computedStyle.marginBottom;
+          containerElement.style.justifyContent = sender === 'me' ? 'flex-end' : 'flex-start';
+          containerElement.style.marginBottom = '0.25rem';
           containerElement.style.width = '100%';
         }
       });
@@ -1978,6 +1978,7 @@ const WhatsAppClone: React.FC = () => {
                   )}
                   <div
                     className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'} mb-1`}
+                    data-sender={message.sender}
                   >
                     <div
                       onClick={() => setShowMessageMenu(showMessageMenu === message.id ? null : message.id)}
